@@ -1,12 +1,11 @@
-import express from "express"
-import {setupApp} from './super-app';
+    import express from "express"
+    import {setupApp} from './super-app';
 
+    const app = express()
+    setupApp(app)
 
-const app = express()
-setupApp(app)
+    const PORT = process.env.PORT || 5001
 
-const PORT = process.env.PORT || 5000
-
-app.listen(PORT, () => {
-    console.log(`Listening on port ${PORT}`)
-})
+    app.listen(PORT, () => {
+        console.log(`Listening on port ${PORT}`)
+    })
