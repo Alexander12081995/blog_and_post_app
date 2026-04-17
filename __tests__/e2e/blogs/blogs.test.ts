@@ -27,7 +27,7 @@ describe("tests blogs api", () => {
         const newBlog: BlogCreateInputDto = {
             name: "test1",
             description: "test1",
-            websiteUrl: "test1"
+            websiteUrl: "https://YclbAtsmRVN9adx5jaB8jL9F_7pPhgc6L5wVKH4-BBNE1iq3q-HrFQmuKNWD9PnVMNLwbhGmCOrB.tW6X26Yt1I6zzfF"
         };
 
         const result: { body: Blog } = await request(app)
@@ -44,7 +44,7 @@ describe("tests blogs api", () => {
         const newBlog: BlogCreateInputDto = {
             name: "test2",
             description: "test2",
-            websiteUrl: "test2"
+            websiteUrl: "https://YclbAtsmRVN9adx5jaB8jL9F_7pPhgc6L5wVKH4-BBNE1iq3q-HrFQmuKNWD9PnVMNLwbhGmCOrB.tW6X26Yt1I6zzfF"
         };
 
         const result: { body: Blog } = await request(app)

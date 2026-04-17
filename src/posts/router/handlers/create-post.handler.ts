@@ -3,9 +3,9 @@ import {PostCreateInputDto} from '../../dto/post.input-dto';
 import {Post} from '../../types/post.types';
 import {HttpStatus} from '../../../core/types/http-statuses';
 import {postRepository} from '../../repositories/post-repository';
-import {ErrorsMessages} from '../../../core/types/errors';
+import {ValidationErrorsMessagesType} from '../../../core/types/validationErrors';
 
-export const createPostHandler = (req: Request<{}, {}, PostCreateInputDto>, res: Response<Post | ErrorsMessages>) => {
+export const createPostHandler = (req: Request<{}, {}, PostCreateInputDto>, res: Response<Post | ValidationErrorsMessagesType>) => {
     const post = postRepository.create(req.body);
 
     if (post) {

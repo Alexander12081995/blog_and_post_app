@@ -22,12 +22,12 @@ describe('', () => {
         const newBlog1: BlogCreateInputDto = {
             name: "For one post",
             description: "test",
-            websiteUrl: "test"
+            websiteUrl: "https://YclbAtsmRVN9adx5jaB8jL9F_7pPhgc6L5wVKH4-BBNE1iq3q-HrFQmuKNWD9PnVMNLwbhGmCOrB.tW6X26Yt1I6zzfF"
         }
         const newBlog2: BlogCreateInputDto = {
             name: "For two post",
             description: "test",
-            websiteUrl: "test"
+            websiteUrl: "https://YclbAtsmRVN9adx5jaB8jL9F_7pPhgc6L5wVKH4-BBNE1iq3q-HrFQmuKNWD9PnVMNLwbhGmCOrB.tW6X26Yt1I6zzfF"
         }
 
 

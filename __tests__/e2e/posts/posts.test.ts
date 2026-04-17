@@ -30,7 +30,7 @@ describe('tests posts api', () => {
         const newBlog: BlogCreateInputDto = {
             name: "For post",
             description: "For post",
-            websiteUrl: "For post",
+            websiteUrl: "https://YclbAtsmRVN9adx5jaB8jL9F_7pPhgc6L5wVKH4-BBNE1iq3q-HrFQmuKNWD9PnVMNLwbhGmCOrB.tW6X26Yt1I6zzfF",
         }
 
         const blog = await request(app).post(BLOGS_PATH).send(newBlog).expect(HttpStatus.Created);
