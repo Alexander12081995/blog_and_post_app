@@ -1,7 +1,9 @@
 import {Request, Response} from "express"
 import {HttpStatus} from '../../../core/types/http-statuses';
-import {db} from '../../../db/in-memory.db';
+import {blogsRepository} from '../../repositories/blogsRepository';
 
 export const getListBlogsHandler = (req: Request, res: Response) => {
-    res.status(HttpStatus.Ok).send(db.blogs)
+    const blogs = blogsRepository.findAll()
+
+    res.status(HttpStatus.Ok).send(blogs)
 }

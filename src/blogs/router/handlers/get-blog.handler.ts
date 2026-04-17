@@ -1,9 +1,10 @@
 import {Request, Response} from 'express';
-import {db} from '../../../db/in-memory.db';
 import {HttpStatus} from '../../../core/types/http-statuses';
+import {blogsRepository} from '../../repositories/blogsRepository';
 
 export const getBlogHandler = (req: Request<{id: string}>, res: Response) => {
-    const findBlog = db.blogs.find(b => b.id === req.params.id);
+    const findBlog = blogsRepository.findById(req.params.id);
+
     if(findBlog) {
         res.status(HttpStatus.Ok).send(findBlog)
     } else {
