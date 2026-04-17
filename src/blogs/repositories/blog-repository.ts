@@ -2,7 +2,7 @@ import {Blog} from '../types/blog.types';
 import {db} from '../../db/in-memory.db';
 import {BlogCreateInputDto, BlogUpdateInputDto} from '../dto/blog.input-dto';
 
-export const blogsRepository = {
+export const blogRepository = {
     findAll(): Blog[] {
         return db.blogs
     },
@@ -27,26 +27,17 @@ export const blogsRepository = {
     update(id: string, newBlog: BlogUpdateInputDto): void {
         const blogIndex = db.blogs.findIndex(b => b.id === id);
 
-        if (blogIndex === -1) {
-            throw new Error("Blog not found");
-        }
-
         db.blogs[blogIndex] = {
             ...db.blogs[blogIndex],
             ...newBlog
         }
-
-        return
     },
 
-    delete(id: string): void {
-        const blogIndex = db.blogs.findIndex(b => b.id === id);
+    delete(blogId: string): void {
+        const blogIndex = db.blogs.findIndex(b => b.id === blogId);
 
-        if (blogIndex === -1) {
-            throw new Error("Blog not found");
-        }
+        db.posts = db.posts.filter(p => p.blogId !== db.blogs[blogIndex].id)
 
         db.blogs.splice(blogIndex, 1);
-        return
     }
 }

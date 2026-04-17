@@ -1,10 +1,12 @@
 import express from 'express';
 import {setupApp} from '../../../src/super-app';
 import request from 'supertest';
-import {POSTS_PATH, TESTING_PATH} from '../../../src/core/paths/paths';
+import {BLOGS_PATH, POSTS_PATH, TESTING_PATH} from '../../../src/core/paths/paths';
 import {HttpStatus} from '../../../src/core/types/http-statuses';
 import {Post} from '../../../src/posts/types/post.types';
 import {PostCreateInputDto, PostUpdateInputDto} from '../../../src/posts/dto/post.input-dto';
+import {Blog} from '../../../src/blogs/types/blog.types';
+import {BlogCreateInputDto} from '../../../src/blogs/dto/blog.input-dto';
 
 describe('tests posts api', () => {
     const app = express();
@@ -18,15 +20,28 @@ describe('tests posts api', () => {
         await request(app).get(POSTS_PATH).expect(HttpStatus.Ok, [])
     })
 
+    let createBlog1: Blog | null = null
     let createdPost1: Post | null = null
     let createdPost2: Post | null = null
 
+
+
     it('✅ should create post 1 with correct input data', async () => {
+        const newBlog: BlogCreateInputDto = {
+            name: "For post",
+            description: "For post",
+            websiteUrl: "For post",
+        }
+
+        const blog = await request(app).post(BLOGS_PATH).send(newBlog).expect(HttpStatus.Created);
+
+        createBlog1 = blog.body
+
         const newPost: PostCreateInputDto = {
             title: "test1",
             shortDescription: "test1",
             content: "test1",
-            blogId: "test1"
+            blogId: createBlog1!.id
         }
 
         const res: { body: Post } = await request(app).post(POSTS_PATH).send(newPost).expect(HttpStatus.Created)
@@ -40,7 +55,7 @@ describe('tests posts api', () => {
             title: "test2",
             shortDescription: "test2",
             content: "test2",
-            blogId: "test2"
+            blogId: createBlog1!.id
         }
 
         const res: { body: Post } = await request(app).post(POSTS_PATH).send(newPost).expect(HttpStatus.Created)
@@ -62,7 +77,7 @@ describe('tests posts api', () => {
             title: "qwe",
             shortDescription: "qwe",
             content: "qwe",
-            blogId: "qwe"
+            blogId: createBlog1!.id
         }
 
         await request(app).put(`${POSTS_PATH}/${createdPost1?.id}`).send(updatedPost).expect(HttpStatus.NoContent)
@@ -77,7 +92,7 @@ describe('tests posts api', () => {
         expect(createdPost1).toEqual(expect.objectContaining(updatedPost))
     })
 
-    it('✅', async () => {
+    it('✅ should delete post with correct id', async () => {
         await request(app).delete(`${POSTS_PATH}/${createdPost1?.id}`).expect(HttpStatus.NoContent)
         await request(app).delete(`${POSTS_PATH}/${createdPost2?.id}`).expect(HttpStatus.NoContent)
 

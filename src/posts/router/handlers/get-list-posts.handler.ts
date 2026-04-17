@@ -1,7 +1,8 @@
 import {Request, Response} from 'express'
 import {Post} from '../../types/post.types';
-import {db} from '../../../db/in-memory.db';
+import {postRepository} from '../../repositories/post-repository';
 
 export const getListPostsHandler = (req: Request, res: Response<Post[]>) => {
-    res.status(200).send(db.posts)
+    const posts = postRepository.findAll()
+    res.status(200).send(posts)
 }

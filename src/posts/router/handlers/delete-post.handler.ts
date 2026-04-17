@@ -1,13 +1,15 @@
 import {Request, Response} from 'express';
-import {db} from '../../../db/in-memory.db';
 import {HttpStatus} from '../../../core/types/http-statuses';
+import {postRepository} from '../../repositories/post-repository';
 
-export const deletePostHandler = (req: Request, res: Response) => {
-    const findIndex = db.posts.findIndex(p => p.id === req.params.id);
-    if(findIndex !== -1) {
-        db.posts = db.posts.filter(p => p.id !== req.params.id);
-        res.sendStatus(HttpStatus.NoContent)
-    } else {
-        res.sendStatus(HttpStatus.BadRequest)
+export const deletePostHandler = (req: Request<{ id: string }>, res: Response) => {
+    const post = postRepository.findById(req.params.id)
+
+    if (!post) {
+        res.sendStatus(HttpStatus.NotFound)
+        return
     }
+
+    postRepository.delete(req.params.id)
+    res.sendStatus(HttpStatus.NoContent)
 }

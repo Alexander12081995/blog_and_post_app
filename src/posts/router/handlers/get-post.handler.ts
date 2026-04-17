@@ -1,12 +1,12 @@
 import {Request, Response} from 'express';
 import {Post} from '../../types/post.types';
 import {HttpStatus} from '../../../core/types/http-statuses';
-import {db} from '../../../db/in-memory.db';
+import {postRepository} from '../../repositories/post-repository';
 
 export const getPostHandler = (req: Request<{ id: string }>, res: Response<Post | HttpStatus.BadRequest>) => {
-    const findPost = db.posts.find(post => post.id === req.params.id);
-    if (findPost) {
-        res.status(HttpStatus.Ok).send(findPost);
+    const post = postRepository.findById(req.params.id);
+    if (post) {
+        res.status(HttpStatus.Ok).send(post);
     } else {
         res.sendStatus(HttpStatus.NotFound);
     }
