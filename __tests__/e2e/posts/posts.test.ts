@@ -27,7 +27,7 @@ describe('tests posts api', () => {
     let createdPost1: Post | null = null
     let createdPost2: Post | null = null
 
-    it("❌ shouldn't create blog with incorrect input data", async () => {
+    it("❌ shouldn't create post with incorrect input data", async () => {
         const invalidData: PostCreateInputDto = {
             title: "",
             content: "",
@@ -37,7 +37,7 @@ describe('tests posts api', () => {
 
         await request(app).post(POSTS_PATH).set('Authorization', adminToken).send(invalidData).expect(HttpStatus.BadRequest)
     })
-    it("❌ shouldn't create blog with incorrect blogId", async () => {
+    it("❌ shouldn't create post with incorrect blogId", async () => {
         const invalidBlogId: PostCreateInputDto = {
             title: "asd",
             content: "asd",
