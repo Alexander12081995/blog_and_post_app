@@ -6,10 +6,13 @@ import {HttpStatus} from '../../../src/core/types/http-statuses';
 import {Blog} from '../../../src/blogs/types/blog.types';
 import {BlogCreateInputDto} from '../../../src/blogs/dto/blog.input-dto';
 import {PostCreateInputDto} from '../../../src/posts/dto/post.input-dto';
+import {generateAdminAuthToken} from '../../../src/core/utils/generate-admin-auth-token';
 
 describe('', () => {
     const app = express();
     setupApp(app)
+
+    const adminToken = generateAdminAuthToken();
 
     beforeAll(async () => {
         await request(app).delete(TESTING_PATH).expect(HttpStatus.NoContent);
@@ -31,9 +34,9 @@ describe('', () => {
         }
 
 
-        const result1: { body: Blog } = await request(app).post(BLOGS_PATH).send(newBlog1).expect(HttpStatus.Created);
+        const result1: { body: Blog } = await request(app).post(BLOGS_PATH).set('Authorization', adminToken).send(newBlog1).expect(HttpStatus.Created);
         createBlog1 = result1.body;
-        const result2: { body: Blog } = await request(app).post(BLOGS_PATH).send(newBlog2).expect(HttpStatus.Created);
+        const result2: { body: Blog } = await request(app).post(BLOGS_PATH).set('Authorization', adminToken).send(newBlog2).expect(HttpStatus.Created);
         createBlog2 = result2.body;
 
         const newPost1: PostCreateInputDto = {
@@ -49,13 +52,13 @@ describe('', () => {
             blogId: result2.body.id
         }
 
-        await request(app).post(POSTS_PATH).send(newPost1).expect(HttpStatus.Created);
-        await request(app).post(POSTS_PATH).send(newPost2).expect(HttpStatus.Created);
+        await request(app).post(POSTS_PATH).set('Authorization', adminToken).send(newPost1).expect(HttpStatus.Created);
+        await request(app).post(POSTS_PATH).set('Authorization', adminToken).send(newPost2).expect(HttpStatus.Created);
     })
 
     it('✅ should delete posts with blog', async () => {
-        await request(app).delete(`${BLOGS_PATH}/${createBlog1?.id}`).expect(HttpStatus.NoContent);
-        await request(app).delete(`${BLOGS_PATH}/${createBlog2?.id}`).expect(HttpStatus.NoContent);
+        await request(app).delete(`${BLOGS_PATH}/${createBlog1?.id}`).set('Authorization', adminToken).expect(HttpStatus.NoContent);
+        await request(app).delete(`${BLOGS_PATH}/${createBlog2?.id}`).set('Authorization', adminToken).expect(HttpStatus.NoContent);
 
 
         await request(app).get(POSTS_PATH).expect(HttpStatus.Ok, []);

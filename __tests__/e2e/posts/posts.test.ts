@@ -7,10 +7,13 @@ import {Post} from '../../../src/posts/types/post.types';
 import {PostCreateInputDto, PostUpdateInputDto} from '../../../src/posts/dto/post.input-dto';
 import {Blog} from '../../../src/blogs/types/blog.types';
 import {BlogCreateInputDto} from '../../../src/blogs/dto/blog.input-dto';
+import {generateAdminAuthToken} from '../../../src/core/utils/generate-admin-auth-token';
 
 describe('tests posts api', () => {
     const app = express();
     setupApp(app);
+
+    const adminToken = generateAdminAuthToken()
 
     beforeAll(async () => {
         await request(app).delete(TESTING_PATH).expect(HttpStatus.NoContent);
@@ -32,7 +35,7 @@ describe('tests posts api', () => {
             blogId: ""
         }
 
-        await request(app).post(POSTS_PATH).send(invalidData).expect(HttpStatus.BadRequest)
+        await request(app).post(POSTS_PATH).set('Authorization', adminToken).send(invalidData).expect(HttpStatus.BadRequest)
     })
     it("❌ shouldn't create blog with incorrect blogId", async () => {
         const invalidBlogId: PostCreateInputDto = {
@@ -42,17 +45,17 @@ describe('tests posts api', () => {
             blogId: "qwe"
         }
 
-        await request(app).post(POSTS_PATH).send(invalidBlogId).expect(HttpStatus.NotFound)
+        await request(app).post(POSTS_PATH).set('Authorization', adminToken).send(invalidBlogId).expect(HttpStatus.NotFound)
     })
 
     it('✅ should create post 1 with correct input data', async () => {
         const newBlog: BlogCreateInputDto = {
             name: "For post",
             description: "For post",
-            websiteUrl: "https://YclbAtsmRVN9adx5jaB8jL9F_7pPhgc6L5wVKH4-BBNE1iq3q-HrFQmuKNWD9PnVMNLwbhGmCOrB.tW6X26Yt1I6zzfF",
+            websiteUrl: "https://YclbAtsmRVN9adx5jaB8jL9F_7pPhgc6L5wVKH4-BBNE1iq3q-HrFQmuKNWD9PnVMNLwbhGmCOrB.tW6X26Yt1I6zzfF"
         }
 
-        const blog = await request(app).post(BLOGS_PATH).send(newBlog).expect(HttpStatus.Created);
+        const blog = await request(app).post(BLOGS_PATH).set('Authorization', adminToken).send(newBlog).expect(HttpStatus.Created);
 
         createBlog1 = blog.body
 
@@ -63,7 +66,9 @@ describe('tests posts api', () => {
             blogId: createBlog1!.id
         }
 
-        const res: { body: Post } = await request(app).post(POSTS_PATH).send(newPost).expect(HttpStatus.Created)
+        const res: {
+            body: Post
+        } = await request(app).post(POSTS_PATH).set('Authorization', adminToken).send(newPost).expect(HttpStatus.Created)
 
         createdPost1 = res.body
 
@@ -77,7 +82,9 @@ describe('tests posts api', () => {
             blogId: createBlog1!.id
         }
 
-        const res: { body: Post } = await request(app).post(POSTS_PATH).send(newPost).expect(HttpStatus.Created)
+        const res: {
+            body: Post
+        } = await request(app).post(POSTS_PATH).set('Authorization', adminToken).send(newPost).expect(HttpStatus.Created)
 
         createdPost2 = res.body
 
@@ -103,7 +110,7 @@ describe('tests posts api', () => {
             blogId: ""
         }
 
-        await request(app).put(`${POSTS_PATH}/1`).send(invalidData).expect(HttpStatus.BadRequest)
+        await request(app).put(`${POSTS_PATH}/1`).set('Authorization', adminToken).send(invalidData).expect(HttpStatus.BadRequest)
     })
     it("❌ shouldn't update post incorrect blogId", async () => {
         const invalidData: PostUpdateInputDto = {
@@ -113,7 +120,7 @@ describe('tests posts api', () => {
             blogId: "qwe"
         }
 
-        await request(app).put(`${POSTS_PATH}/${createdPost1?.id}`).send(invalidData).expect(HttpStatus.NotFound)
+        await request(app).put(`${POSTS_PATH}/${createdPost1?.id}`).set('Authorization', adminToken).send(invalidData).expect(HttpStatus.NotFound)
     })
     it("❌ shouldn't update post incorrect id", async () => {
         const invalidData: PostUpdateInputDto = {
@@ -123,7 +130,7 @@ describe('tests posts api', () => {
             blogId: createBlog1!.id
         }
 
-        await request(app).put(`${POSTS_PATH}/${-100}`).send(invalidData).expect(HttpStatus.NotFound)
+        await request(app).put(`${POSTS_PATH}/${-100}`).set('Authorization', adminToken).send(invalidData).expect(HttpStatus.NotFound)
     })
 
     it('✅ should update post with correct data', async () => {
@@ -134,9 +141,9 @@ describe('tests posts api', () => {
             blogId: createBlog1!.id
         }
 
-        await request(app).put(`${POSTS_PATH}/${createdPost1?.id}`).send(updatedPost).expect(HttpStatus.NoContent)
+        await request(app).put(`${POSTS_PATH}/${createdPost1?.id}`).set('Authorization', adminToken).send(updatedPost).expect(HttpStatus.NoContent)
 
-        if(createdPost1) {
+        if (createdPost1) {
             createdPost1 = {
                 ...createdPost1,
                 ...updatedPost
@@ -147,12 +154,12 @@ describe('tests posts api', () => {
     })
 
     it("❌ shouldn't delete post with incorrect id", async () => {
-        await request(app).delete(`${POSTS_PATH}/${-100}`).expect(HttpStatus.NotFound)
+        await request(app).delete(`${POSTS_PATH}/${-100}`).set('Authorization', adminToken).expect(HttpStatus.NotFound)
     })
 
     it('✅ should delete post with correct id', async () => {
-        await request(app).delete(`${POSTS_PATH}/${createdPost1?.id}`).expect(HttpStatus.NoContent)
-        await request(app).delete(`${POSTS_PATH}/${createdPost2?.id}`).expect(HttpStatus.NoContent)
+        await request(app).delete(`${POSTS_PATH}/${createdPost1?.id}`).set('Authorization', adminToken).expect(HttpStatus.NoContent)
+        await request(app).delete(`${POSTS_PATH}/${createdPost2?.id}`).set('Authorization', adminToken).expect(HttpStatus.NoContent)
 
         await request(app).get(POSTS_PATH).expect(HttpStatus.Ok, [])
     })
