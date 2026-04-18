@@ -1,9 +1,6 @@
 import express from "express";
 import request from "supertest";
-import {
-    BlogCreateInputDto,
-    BlogUpdateInputDto
-} from "../../../src/blogs/dto/blog.input-dto";
+import {BlogCreateInputDto, BlogUpdateInputDto} from "../../../src/blogs/dto/blog.input-dto";
 import {Blog} from "../../../src/blogs/types/blog.types";
 import {BLOGS_PATH, TESTING_PATH} from "../../../src/core/paths/paths";
 import {HttpStatus} from "../../../src/core/types/http-statuses";
@@ -23,6 +20,20 @@ describe("tests blogs api", () => {
 
     let createBlog1: Blog | null = null;
     let createBlog2: Blog | null = null;
+
+    it("❌ shouldn't create blog with incorrect input data", async () => {
+        const invalidBlog: BlogCreateInputDto = {
+            name: "",
+            description: "",
+            websiteUrl: ""
+        }
+
+        const res = await request(app).post(BLOGS_PATH).send(invalidBlog).expect(HttpStatus.BadRequest);
+        expect(res.body).toHaveProperty("errorsMessages")
+        expect(Array.isArray(res.body.errorsMessages)).toBe(true)
+    })
+
+
     it("✅ should create a blog 1 with correct data", async () => {
         const newBlog: BlogCreateInputDto = {
             name: "test1",
@@ -59,6 +70,11 @@ describe("tests blogs api", () => {
             .get(BLOGS_PATH)
             .expect(HttpStatus.Ok, [createBlog1, createBlog2]);
     });
+
+    it("❌ shouldn't return blog with incorrect id", async () => {
+        await request(app).get(`${BLOGS_PATH}/123`).expect(HttpStatus.NotFound)
+    })
+
     it("✅ should return a blog with correct id", async () => {
         await request(app)
             .get(`${BLOGS_PATH}/${createBlog1?.id}`)
@@ -67,11 +83,29 @@ describe("tests blogs api", () => {
             .get(`${BLOGS_PATH}/${createBlog2?.id}`)
             .expect(HttpStatus.Ok, createBlog2);
     });
+
+    it("❌ shouldn't update blog with incorrect id", async () => {
+        const updatedData: BlogUpdateInputDto = {
+            name: "qwe",
+            description: "qwe",
+            websiteUrl: "https://YclbAtsmRVN9adx5jaB8jL9F_7pPhgc6L5wVKH4-BBNE1iq3q-HrFQmuKNWD9PnVMNLwbhGmCOrB.tW6X26Yt1I6zzfF"
+        };
+        await request(app).put(`${BLOGS_PATH}/${-100}`).send(updatedData).expect(HttpStatus.NotFound)
+    })
+    it("❌ shouldn't update blog with incorrect input data", async () => {
+        const updatedData: BlogUpdateInputDto = {
+            name: "",
+            description: "",
+            websiteUrl: ""
+        };
+        await request(app).put(`${BLOGS_PATH}/${-100}`).send(updatedData).expect(HttpStatus.BadRequest)
+    })
+
     it("✅ should update blog with correct input data", async () => {
         const updatedData: BlogUpdateInputDto = {
             name: "qwe",
             description: "qwe",
-            websiteUrl: "qwe"
+            websiteUrl: "https://YclbAtsmRVN9adx5jaB8jL9F_7pPhgc6L5wVKH4-BBNE1iq3q-HrFQmuKNWD9PnVMNLwbhGmCOrB.tW6X26Yt1I6zzfF"
         };
         await request(app)
             .put(`${BLOGS_PATH}/${createBlog1?.id}`)
@@ -86,6 +120,11 @@ describe("tests blogs api", () => {
         }
         expect(createBlog1).toEqual(expect.objectContaining(updatedData));
     });
+
+    it("❌ shouldn't delete blog with incorrect id", async () => {
+        await request(app).delete(`${BLOGS_PATH}/${-100}`).expect(HttpStatus.NotFound)
+    })
+
     it("✅ should delete blog with correct id", async () => {
         await request(app)
             .delete(`${BLOGS_PATH}/${createBlog1?.id}`)

@@ -8,6 +8,6 @@ export const getBlogHandler = (req: Request<{id: string}>, res: Response) => {
     if(findBlog) {
         res.status(HttpStatus.Ok).send(findBlog)
     } else {
-        res.send(HttpStatus.NotFound)
+        res.sendStatus(HttpStatus.NotFound)
     }
 }

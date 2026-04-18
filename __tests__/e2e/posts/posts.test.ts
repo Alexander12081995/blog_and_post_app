@@ -24,7 +24,26 @@ describe('tests posts api', () => {
     let createdPost1: Post | null = null
     let createdPost2: Post | null = null
 
+    it("❌ shouldn't create blog with incorrect input data", async () => {
+        const invalidData: PostCreateInputDto = {
+            title: "",
+            content: "",
+            shortDescription: "",
+            blogId: ""
+        }
 
+        await request(app).post(POSTS_PATH).send(invalidData).expect(HttpStatus.BadRequest)
+    })
+    it("❌ shouldn't create blog with incorrect blogId", async () => {
+        const invalidBlogId: PostCreateInputDto = {
+            title: "asd",
+            content: "asd",
+            shortDescription: "asd",
+            blogId: "qwe"
+        }
+
+        await request(app).post(POSTS_PATH).send(invalidBlogId).expect(HttpStatus.NotFound)
+    })
 
     it('✅ should create post 1 with correct input data', async () => {
         const newBlog: BlogCreateInputDto = {
@@ -67,9 +86,44 @@ describe('tests posts api', () => {
         await request(app).get(POSTS_PATH).expect(HttpStatus.Ok, [createdPost1, createdPost2])
     })
 
+    it("❌ shouldn't get post incorrect id", async () => {
+        await request(app).get(`${POSTS_PATH}/${-100}`).expect(HttpStatus.NotFound)
+    })
+
     it('✅ should get posts by id', async () => {
         await request(app).get(`${POSTS_PATH}/${createdPost1?.id}`).expect(HttpStatus.Ok, createdPost1)
         await request(app).get(`${POSTS_PATH}/${createdPost2?.id}`).expect(HttpStatus.Ok, createdPost2)
+    })
+
+    it("❌ shouldn't update post incorrect input data", async () => {
+        const invalidData: PostUpdateInputDto = {
+            title: "",
+            content: "",
+            shortDescription: "",
+            blogId: ""
+        }
+
+        await request(app).put(`${POSTS_PATH}/1`).send(invalidData).expect(HttpStatus.BadRequest)
+    })
+    it("❌ shouldn't update post incorrect blogId", async () => {
+        const invalidData: PostUpdateInputDto = {
+            title: "qwe",
+            content: "qwe",
+            shortDescription: "qwe",
+            blogId: "qwe"
+        }
+
+        await request(app).put(`${POSTS_PATH}/${createdPost1?.id}`).send(invalidData).expect(HttpStatus.NotFound)
+    })
+    it("❌ shouldn't update post incorrect id", async () => {
+        const invalidData: PostUpdateInputDto = {
+            title: "qwe",
+            content: "qwe",
+            shortDescription: "qwe",
+            blogId: createBlog1!.id
+        }
+
+        await request(app).put(`${POSTS_PATH}/${-100}`).send(invalidData).expect(HttpStatus.NotFound)
     })
 
     it('✅ should update post with correct data', async () => {
@@ -90,6 +144,10 @@ describe('tests posts api', () => {
         }
 
         expect(createdPost1).toEqual(expect.objectContaining(updatedPost))
+    })
+
+    it("❌ shouldn't delete post with incorrect id", async () => {
+        await request(app).delete(`${POSTS_PATH}/${-100}`).expect(HttpStatus.NotFound)
     })
 
     it('✅ should delete post with correct id', async () => {
