@@ -1,11 +1,20 @@
-    import express from "express"
-    import {setupApp} from './super-app';
+import express from "express";
+import { SETTINGS } from "./core/settings/settings";
+import { runDB } from "./db/mongo.db";
+import { setupApp } from "./super-app";
 
-    const app = express()
-    setupApp(app)
+const bootstrap = async () => {
+  const app = express();
+  setupApp(app);
+  const PORT = SETTINGS.PORT;
 
-    const PORT = process.env.PORT || 5001
+  await runDB(SETTINGS.MONGO_URL);
 
-    app.listen(PORT, () => {
-        console.log(`Listening on port ${PORT}`)
-    })
+  app.listen(PORT, () => {
+    console.log(`Listening on port ${PORT}`);
+  });
+
+  return app;
+};
+
+bootstrap();

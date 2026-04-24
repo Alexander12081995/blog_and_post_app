@@ -1,3 +1,3 @@
-export const BLOGS_PATH = "/ht_02/api/blogs"
-export const POSTS_PATH = "/ht_02/api/posts"
-export const TESTING_PATH = "/ht_02/api/testing/all-data"
+export const BLOGS_PATH = "/hometask_03/api/blogs";
+export const POSTS_PATH = "/hometask_03/api/posts";
+export const TESTING_PATH = "/hometask_03/api/testing/all-data";

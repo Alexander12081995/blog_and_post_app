@@ -1,17 +1,8 @@
-import {Router, Request, Response} from 'express';
-import {db} from '../../db/in-memory.db';
-import {HttpStatus} from '../../core/types/http-statuses';
+import { Router } from "express";
+import { superAdminGuardMiddleware } from "../../auth/middlewares/super-admin.guard-middleware";
+import { inputValidationResultMiddleware } from "../../core/middlewares/validation/input-validation-result.middleware";
+import { cleanDBHandler } from "./handlers/cleanDB-handler";
 
-export const testingRouter = Router({})
+export const testingRouter = Router({});
 
-testingRouter
-    .delete("", (req: Request, res: Response) => {
-        db.blogs = [];
-        db.posts = []
-        res.sendStatus(HttpStatus.NoContent)
-    })
-
-
-
-
-
+testingRouter.delete("", superAdminGuardMiddleware, inputValidationResultMiddleware, cleanDBHandler);
