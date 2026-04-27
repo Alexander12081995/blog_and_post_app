@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import { HttpStatus } from "../../../core/types/http-statuses";
+import { postRepository } from "../../../posts/repositories/post-repository";
 import { blogRepository } from "../../repositories/blog-repository";
 
 export const deleteBlogHandler = async (req: Request<{ id: string }>, res: Response) => {
@@ -12,9 +13,9 @@ export const deleteBlogHandler = async (req: Request<{ id: string }>, res: Respo
     }
 
     await blogRepository.delete(req.params.id);
-    res.sendStatus(HttpStatus.NoContent);
+    await postRepository.deleteByBlogId(req.params.id);
 
-    // db.posts = db.posts.filter((p) => p.blogId !== db.blogs[blogIndex].id);
+    res.sendStatus(HttpStatus.NoContent);
   } catch (e: unknown) {
     res.sendStatus(HttpStatus.InternalServerError);
   }

@@ -23,7 +23,7 @@ export async function runDB(url: string): Promise<void> {
     console.log("✅ Connected to database");
   } catch (e) {
     await client.close();
-    throw new Error("❌ Failed to connect to database: " + e);
+    throw new Error(`❌ Failed to connect to database: ${e}`);
   }
 }
 

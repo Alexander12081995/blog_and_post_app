@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import { HttpStatus } from "../../../core/types/http-statuses";
+import { postRepository } from "../../../posts/repositories/post-repository";
 import { BlogUpdateInputDto } from "../../dto/blog.input-dto";
 import { blogRepository } from "../../repositories/blog-repository";
 
@@ -13,8 +14,7 @@ export const updateBlogHandler = async (req: Request<{ id: string }, {}, BlogUpd
     }
 
     await blogRepository.update(req.params.id, req.body);
-
-    // postRepository.updateBlogNameForPosts(req.params.id, req.body.name);
+    await postRepository.updateByBlogId(req.params.id, req.body.name);
 
     res.sendStatus(HttpStatus.NoContent);
   } catch (e: unknown) {

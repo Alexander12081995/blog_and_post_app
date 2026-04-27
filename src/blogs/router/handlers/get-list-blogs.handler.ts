@@ -11,8 +11,4 @@ export const getListBlogsHandler = async (req: Request, res: Response) => {
   } catch (e: unknown) {
     res.sendStatus(HttpStatus.InternalServerError);
   }
-
-  //   const blogs = await blogRepository.findAll();
-
-  //   res.status(HttpStatus.Ok).send(blogs);
 };
