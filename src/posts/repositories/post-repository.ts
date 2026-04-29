@@ -5,7 +5,8 @@ import { Post } from "../types/post.types";
 
 export const postRepository = {
   async findAll(): Promise<WithId<Post>[]> {
-    return postsCollection.find({}).toArray();
+    const posts = await postsCollection.find({}).toArray();
+    return posts;
   },
   async findById(id: string): Promise<WithId<Post> | null> {
     return postsCollection.findOne({ _id: new ObjectId(id) });

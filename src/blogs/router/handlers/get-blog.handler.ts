@@ -1,17 +1,11 @@
 import { Request, Response } from "express";
 import { HttpStatus } from "../../../core/types/http-statuses";
-import { blogRepository } from "../../repositories/blog-repository";
+import { blogsService } from "../../application/blog.service";
 import { mapToBlogViewModel } from "../mappers/map-to-blog-view-model.util";
 
 export const getBlogHandler = async (req: Request<{ id: string }>, res: Response) => {
   try {
-    const blog = await blogRepository.findById(req.params.id);
-
-    if (!blog) {
-      res.sendStatus(HttpStatus.NotFound);
-      return;
-    }
-
+    const blog = await blogsService.findById(req.params.id);
     const blogViewModel = mapToBlogViewModel(blog);
     res.status(HttpStatus.Ok).send(blogViewModel);
   } catch (e) {

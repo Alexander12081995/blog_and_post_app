@@ -5,11 +5,17 @@ import { Blog } from "../types/blog.types";
 
 export const blogRepository = {
   async findAll(): Promise<WithId<Blog>[]> {
-    return blogsCollection.find({}).toArray();
+    const items = await blogsCollection.find({}).toArray();
+    return items;
   },
 
-  async findById(id: string): Promise<WithId<Blog> | null> {
-    return blogsCollection.findOne({ _id: new ObjectId(id) });
+  async findById(id: string): Promise<WithId<Blog>> {
+    const blog = await blogsCollection.findOne({ _id: new ObjectId(id) });
+    if (!blog) {
+      throw new Error("Blog not found");
+    }
+
+    return blog;
   },
 
   async create(newBlog: Blog): Promise<WithId<Blog>> {
@@ -21,11 +27,7 @@ export const blogRepository = {
     const updateResult = await blogsCollection.updateOne(
       { _id: new ObjectId(id) },
       {
-        $set: {
-          name: dto.name,
-          description: dto.description,
-          websiteUrl: dto.websiteUrl,
-        },
+        $set: dto,
       },
     );
 

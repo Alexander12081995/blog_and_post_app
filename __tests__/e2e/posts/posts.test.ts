@@ -1,12 +1,13 @@
 import express from "express";
 import request from "supertest";
 import { BlogCreateInputDto } from "../../../src/blogs/dto/blog.input-dto";
-import { Blog } from "../../../src/blogs/types/blog.types";
-import { BLOGS_PATH, POSTS_PATH, TESTING_PATH } from "../../../src/core/paths/paths";
+import { BlogViewModel } from "../../../src/blogs/types/blog-view-model";
+import { BLOG_TESTING_PATH, POST_TESTING_PATH, TEST_TESTING_PATH } from "../../../src/core/paths/paths";
 import { HttpStatus } from "../../../src/core/types/http-statuses";
 import { generateAdminAuthToken } from "../../../src/core/utils/generate-admin-auth-token";
+import { runDB } from "../../../src/db/mongo.db";
 import { PostCreateInputDto, PostUpdateInputDto } from "../../../src/posts/dto/post.input-dto";
-import { Post } from "../../../src/posts/types/post.types";
+import { PostViewModel } from "../../../src/posts/types/post-view-model";
 import { setupApp } from "../../../src/super-app";
 
 describe("tests posts api", () => {
@@ -16,16 +17,17 @@ describe("tests posts api", () => {
   const adminToken = generateAdminAuthToken();
 
   beforeAll(async () => {
-    await request(app).delete(TESTING_PATH).set("Authorization", adminToken).expect(HttpStatus.NoContent);
+    await runDB("mongodb://127.0.0.1:27017/test_db");
+    await request(app).delete(TEST_TESTING_PATH).expect(HttpStatus.NoContent);
   });
 
   it("✅ should get empty array posts", async () => {
-    await request(app).get(POSTS_PATH).expect(HttpStatus.Ok, []);
+    await request(app).get(POST_TESTING_PATH).expect(HttpStatus.Ok, []);
   });
 
-  let createBlog1: Blog | null = null;
-  let createdPost1: Post | null = null;
-  let createdPost2: Post | null = null;
+  let createBlog1: BlogViewModel | null = null;
+  let createdPost1: PostViewModel | null = null;
+  let createdPost2: PostViewModel | null = null;
 
   it("❌ shouldn't create post with incorrect input data", async () => {
     const invalidData: PostCreateInputDto = {
@@ -36,7 +38,7 @@ describe("tests posts api", () => {
     };
 
     await request(app)
-      .post(POSTS_PATH)
+      .post(POST_TESTING_PATH)
       .set("Authorization", adminToken)
       .send(invalidData)
       .expect(HttpStatus.BadRequest);
@@ -50,7 +52,7 @@ describe("tests posts api", () => {
     };
 
     await request(app)
-      .post(POSTS_PATH)
+      .post(POST_TESTING_PATH)
       .set("Authorization", adminToken)
       .send(invalidBlogId)
       .expect(HttpStatus.NotFound);
@@ -65,7 +67,7 @@ describe("tests posts api", () => {
     };
 
     const blog = await request(app)
-      .post(BLOGS_PATH)
+      .post(BLOG_TESTING_PATH)
       .set("Authorization", adminToken)
       .send(newBlog)
       .expect(HttpStatus.Created);
@@ -80,13 +82,18 @@ describe("tests posts api", () => {
     };
 
     const res: {
-      body: Post;
-    } = await request(app).post(POSTS_PATH).set("Authorization", adminToken).send(newPost).expect(HttpStatus.Created);
+      body: PostViewModel;
+    } = await request(app)
+      .post(POST_TESTING_PATH)
+      .set("Authorization", adminToken)
+      .send(newPost)
+      .expect(HttpStatus.Created);
 
     createdPost1 = res.body;
 
     expect(createdPost1).toEqual(expect.objectContaining(newPost));
   });
+
   it("✅ should create post 2 with correct input data", async () => {
     const newPost: PostCreateInputDto = {
       title: "test2",
@@ -96,23 +103,27 @@ describe("tests posts api", () => {
     };
 
     const res: {
-      body: Post;
-    } = await request(app).post(POSTS_PATH).set("Authorization", adminToken).send(newPost).expect(HttpStatus.Created);
+      body: PostViewModel;
+    } = await request(app)
+      .post(POST_TESTING_PATH)
+      .set("Authorization", adminToken)
+      .send(newPost)
+      .expect(HttpStatus.Created);
 
     createdPost2 = res.body;
 
     expect(createdPost2).toEqual(expect.objectContaining(newPost));
 
-    await request(app).get(POSTS_PATH).expect(HttpStatus.Ok, [createdPost1, createdPost2]);
+    await request(app).get(POST_TESTING_PATH).expect(HttpStatus.Ok, [createdPost1, createdPost2]);
   });
 
   it("❌ shouldn't get post incorrect id", async () => {
-    await request(app).get(`${POSTS_PATH}/${-100}`).expect(HttpStatus.NotFound);
+    await request(app).get(`${POST_TESTING_PATH}/${-100}`).expect(HttpStatus.NotFound);
   });
 
   it("✅ should get posts by id", async () => {
-    await request(app).get(`${POSTS_PATH}/${createdPost1?.id}`).expect(HttpStatus.Ok, createdPost1);
-    await request(app).get(`${POSTS_PATH}/${createdPost2?.id}`).expect(HttpStatus.Ok, createdPost2);
+    await request(app).get(`${POST_TESTING_PATH}/${createdPost1?.id}`).expect(HttpStatus.Ok, createdPost1);
+    await request(app).get(`${POST_TESTING_PATH}/${createdPost2?.id}`).expect(HttpStatus.Ok, createdPost2);
   });
 
   it("❌ shouldn't update post incorrect input data", async () => {
@@ -124,7 +135,7 @@ describe("tests posts api", () => {
     };
 
     await request(app)
-      .put(`${POSTS_PATH}/1`)
+      .put(`${POST_TESTING_PATH}/1`)
       .set("Authorization", adminToken)
       .send(invalidData)
       .expect(HttpStatus.BadRequest);
@@ -138,7 +149,7 @@ describe("tests posts api", () => {
     };
 
     await request(app)
-      .put(`${POSTS_PATH}/${createdPost1?.id}`)
+      .put(`${POST_TESTING_PATH}/${createdPost1?.id}`)
       .set("Authorization", adminToken)
       .send(invalidData)
       .expect(HttpStatus.NotFound);
@@ -152,7 +163,7 @@ describe("tests posts api", () => {
     };
 
     await request(app)
-      .put(`${POSTS_PATH}/${-100}`)
+      .put(`${POST_TESTING_PATH}/${-100}`)
       .set("Authorization", adminToken)
       .send(invalidData)
       .expect(HttpStatus.NotFound);
@@ -167,7 +178,7 @@ describe("tests posts api", () => {
     };
 
     await request(app)
-      .put(`${POSTS_PATH}/${createdPost1?.id}`)
+      .put(`${POST_TESTING_PATH}/${createdPost1?.id}`)
       .set("Authorization", adminToken)
       .send(updatedPost)
       .expect(HttpStatus.NoContent);
@@ -183,19 +194,22 @@ describe("tests posts api", () => {
   });
 
   it("❌ shouldn't delete post with incorrect id", async () => {
-    await request(app).delete(`${POSTS_PATH}/${-100}`).set("Authorization", adminToken).expect(HttpStatus.NotFound);
+    await request(app)
+      .delete(`${POST_TESTING_PATH}/${-100}`)
+      .set("Authorization", adminToken)
+      .expect(HttpStatus.NotFound);
   });
 
   it("✅ should delete post with correct id", async () => {
     await request(app)
-      .delete(`${POSTS_PATH}/${createdPost1?.id}`)
+      .delete(`${POST_TESTING_PATH}/${createdPost1?.id}`)
       .set("Authorization", adminToken)
       .expect(HttpStatus.NoContent);
     await request(app)
-      .delete(`${POSTS_PATH}/${createdPost2?.id}`)
+      .delete(`${POST_TESTING_PATH}/${createdPost2?.id}`)
       .set("Authorization", adminToken)
       .expect(HttpStatus.NoContent);
 
-    await request(app).get(POSTS_PATH).expect(HttpStatus.Ok, []);
+    await request(app).get(POST_TESTING_PATH).expect(HttpStatus.Ok, []);
   });
 });

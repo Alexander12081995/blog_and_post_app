@@ -1,10 +1,11 @@
 import express from "express";
 import request from "supertest";
 import { BlogCreateInputDto, BlogUpdateInputDto } from "../../../src/blogs/dto/blog.input-dto";
-import { Blog } from "../../../src/blogs/types/blog.types";
-import { BLOGS_PATH, TESTING_PATH } from "../../../src/core/paths/paths";
+import { BlogViewModel } from "../../../src/blogs/types/blog-view-model";
+import { BLOG_TESTING_PATH, TEST_TESTING_PATH } from "../../../src/core/paths/paths";
 import { HttpStatus } from "../../../src/core/types/http-statuses";
 import { generateAdminAuthToken } from "../../../src/core/utils/generate-admin-auth-token";
+import { runDB } from "../../../src/db/mongo.db";
 import { setupApp } from "../../../src/super-app";
 
 describe("tests blogs api", () => {
@@ -14,15 +15,16 @@ describe("tests blogs api", () => {
   const adminToken = generateAdminAuthToken();
 
   beforeAll(async () => {
-    await request(app).delete(TESTING_PATH).set("Authorization", adminToken).expect(HttpStatus.NoContent);
+    await runDB("mongodb://127.0.0.1:27017/test_db");
+    await request(app).delete(TEST_TESTING_PATH).expect(HttpStatus.NoContent);
   });
 
   it("✅ should return empty array blogs", async () => {
-    await request(app).get(BLOGS_PATH).expect(HttpStatus.Ok).expect([]);
+    await request(app).get(BLOG_TESTING_PATH).expect(HttpStatus.Ok).expect([]);
   });
 
-  let createBlog1: Blog | null = null;
-  let createBlog2: Blog | null = null;
+  let createBlog1: BlogViewModel | null = null;
+  let createBlog2: BlogViewModel | null = null;
 
   it("❌ shouldn't create blog with incorrect input data", async () => {
     const invalidBlog: BlogCreateInputDto = {
@@ -32,7 +34,7 @@ describe("tests blogs api", () => {
     };
 
     const res = await request(app)
-      .post(BLOGS_PATH)
+      .post(BLOG_TESTING_PATH)
       .set("Authorization", adminToken)
       .send(invalidBlog)
       .expect(HttpStatus.BadRequest);
@@ -48,8 +50,8 @@ describe("tests blogs api", () => {
         "https://YclbAtsmRVN9adx5jaB8jL9F_7pPhgc6L5wVKH4-BBNE1iq3q-HrFQmuKNWD9PnVMNLwbhGmCOrB.tW6X26Yt1I6zzfF",
     };
 
-    const result: { body: Blog } = await request(app)
-      .post(BLOGS_PATH)
+    const result: { body: BlogViewModel } = await request(app)
+      .post(BLOG_TESTING_PATH)
       .set("Authorization", adminToken)
       .send(newBlog)
       .expect(HttpStatus.Created);
@@ -57,7 +59,7 @@ describe("tests blogs api", () => {
 
     expect(createBlog1).toEqual(expect.objectContaining(newBlog));
 
-    await request(app).get(BLOGS_PATH).expect(HttpStatus.Ok, [createBlog1]);
+    await request(app).get(BLOG_TESTING_PATH).expect(HttpStatus.Ok, [createBlog1]);
   });
   it("✅ should create a blog 2 with correct data", async () => {
     const newBlog: BlogCreateInputDto = {
@@ -67,8 +69,8 @@ describe("tests blogs api", () => {
         "https://YclbAtsmRVN9adx5jaB8jL9F_7pPhgc6L5wVKH4-BBNE1iq3q-HrFQmuKNWD9PnVMNLwbhGmCOrB.tW6X26Yt1I6zzfF",
     };
 
-    const result: { body: Blog } = await request(app)
-      .post(BLOGS_PATH)
+    const result: { body: BlogViewModel } = await request(app)
+      .post(BLOG_TESTING_PATH)
       .set("Authorization", adminToken)
       .send(newBlog)
       .expect(HttpStatus.Created);
@@ -76,16 +78,16 @@ describe("tests blogs api", () => {
 
     expect(createBlog2).toEqual(expect.objectContaining(newBlog));
 
-    await request(app).get(BLOGS_PATH).expect(HttpStatus.Ok, [createBlog1, createBlog2]);
+    await request(app).get(BLOG_TESTING_PATH).expect(HttpStatus.Ok, [createBlog1, createBlog2]);
   });
 
   it("❌ shouldn't return blog with incorrect id", async () => {
-    await request(app).get(`${BLOGS_PATH}/123`).expect(HttpStatus.NotFound);
+    await request(app).get(`${BLOG_TESTING_PATH}/123`).expect(HttpStatus.NotFound);
   });
 
   it("✅ should return a blog with correct id", async () => {
-    await request(app).get(`${BLOGS_PATH}/${createBlog1?.id}`).expect(HttpStatus.Ok, createBlog1);
-    await request(app).get(`${BLOGS_PATH}/${createBlog2?.id}`).expect(HttpStatus.Ok, createBlog2);
+    await request(app).get(`${BLOG_TESTING_PATH}/${createBlog1?.id}`).expect(HttpStatus.Ok, createBlog1);
+    await request(app).get(`${BLOG_TESTING_PATH}/${createBlog2?.id}`).expect(HttpStatus.Ok, createBlog2);
   });
 
   it("❌ shouldn't update blog with incorrect id", async () => {
@@ -96,7 +98,7 @@ describe("tests blogs api", () => {
         "https://YclbAtsmRVN9adx5jaB8jL9F_7pPhgc6L5wVKH4-BBNE1iq3q-HrFQmuKNWD9PnVMNLwbhGmCOrB.tW6X26Yt1I6zzfF",
     };
     await request(app)
-      .put(`${BLOGS_PATH}/${-100}`)
+      .put(`${BLOG_TESTING_PATH}/${-100}`)
       .set("Authorization", adminToken)
       .send(updatedData)
       .expect(HttpStatus.NotFound);
@@ -108,7 +110,7 @@ describe("tests blogs api", () => {
       websiteUrl: "",
     };
     await request(app)
-      .put(`${BLOGS_PATH}/${-100}`)
+      .put(`${BLOG_TESTING_PATH}/${-100}`)
       .set("Authorization", adminToken)
       .send(updatedData)
       .expect(HttpStatus.BadRequest);
@@ -122,7 +124,7 @@ describe("tests blogs api", () => {
         "https://YclbAtsmRVN9adx5jaB8jL9F_7pPhgc6L5wVKH4-BBNE1iq3q-HrFQmuKNWD9PnVMNLwbhGmCOrB.tW6X26Yt1I6zzfF",
     };
     await request(app)
-      .put(`${BLOGS_PATH}/${createBlog1?.id}`)
+      .put(`${BLOG_TESTING_PATH}/${createBlog1?.id}`)
       .set("Authorization", adminToken)
       .send(updatedData)
       .expect(HttpStatus.NoContent);
@@ -137,19 +139,22 @@ describe("tests blogs api", () => {
   });
 
   it("❌ shouldn't delete blog with incorrect id", async () => {
-    await request(app).delete(`${BLOGS_PATH}/${-100}`).set("Authorization", adminToken).expect(HttpStatus.NotFound);
+    await request(app)
+      .delete(`${BLOG_TESTING_PATH}/${-100}`)
+      .set("Authorization", adminToken)
+      .expect(HttpStatus.NotFound);
   });
 
   it("✅ should delete blog with correct id", async () => {
     await request(app)
-      .delete(`${BLOGS_PATH}/${createBlog1?.id}`)
+      .delete(`${BLOG_TESTING_PATH}/${createBlog1?.id}`)
       .set("Authorization", adminToken)
       .expect(HttpStatus.NoContent);
     await request(app)
-      .delete(`${BLOGS_PATH}/${createBlog2?.id}`)
+      .delete(`${BLOG_TESTING_PATH}/${createBlog2?.id}`)
       .set("Authorization", adminToken)
       .expect(HttpStatus.NoContent);
 
-    await request(app).get(BLOGS_PATH).expect(HttpStatus.Ok, []);
+    await request(app).get(BLOG_TESTING_PATH).expect(HttpStatus.Ok, []);
   });
 });
